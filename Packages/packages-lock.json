@@ -168,6 +168,13 @@
         "com.unity.modules.imgui": "1.0.0"
       }
     },
+    "egsp.core": {
+      "version": "https://github.com/EveryGameSPlay/Package-Unity.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "bfba7fef4eecced501ef8a4236f36eba4d546244"
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,
