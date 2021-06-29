@@ -9,10 +9,10 @@ namespace Game.Extensions
     public interface IPrefabProvider
     {
         /// <summary>
-        /// Возвращает префаб заданного типа.
+        /// Возвращает экземпляр заданного типа.
         /// </summary>
-        Option<T> GetPrefab<T>() where T : LifetimeMonoBehaviour;
+        Option<T> GetInstance<T>() where T : LifetimeMonoBehaviour;
 
-        Option<T> GetPrefab<T>(Func<T,bool> predicate) where T : LifetimeMonoBehaviour;
+        Option<T> GetInstance<T>(Func<T,bool> predicate) where T : LifetimeMonoBehaviour;
     }
 }

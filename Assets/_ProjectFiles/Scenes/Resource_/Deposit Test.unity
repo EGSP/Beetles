@@ -1207,12 +1207,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1662942323}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 61c80855e22546fdb3e5419caf8aca80, type: 3}
+  m_Script: {fileID: 11500000, guid: 5ae703c2b54b4c8cb3bb57ea9701fdb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabs:
+  spotPrefabs:
   - count: 5
     prefab: {fileID: 4067323782619277163, guid: 444a1f0e051494f4a95eb0f1dd2bc1dc, type: 3}
+  poolName: 
+  poolNames: []
 --- !u!114 &1662942326
 MonoBehaviour:
   m_ObjectHideFlags: 0

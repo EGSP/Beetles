@@ -58,7 +58,7 @@ namespace Game.Environment.Deposits
 
             Debug.Log("Get resource from provider.");
             
-            var resource = PrefabProvider.GetPrefab<Resource>(
+            var resource = PrefabProvider.GetInstance<Resource>(
                 x => x.Rarity == resourceRarity);
 
             if (resource.IsNone)
