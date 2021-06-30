@@ -10,7 +10,7 @@ namespace Game.Extensions
     /// </summary>
     public class PrefabProvider : PoolProvider
     {
-        [Header("Pool")] [Tooltip("Название внешнего пула.")]
+        [Header("External pools")] [Tooltip("Названия внешнего пула.")]
         [SerializeField] private List<string> poolNames;
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Game.Extensions
             SetupPools();
         }
 
-        public override Option<T> GetInstance<T>()
+        protected override Option<T> GetInstance<T>(Option<Func<T, bool>> predicate = default)
         {
             var type = typeof(T);
             
@@ -41,7 +41,9 @@ namespace Game.Extensions
                 // Если не найдено слоя для типа в кеше.
                 if (layer.IsNone)
                 {
-                    var spotLayerO = GetLayer<T>();
+                    Option<PrefabLayer> spotLayerO;
+                    spotLayerO = GetLayer<T>(predicate.Value);
+
                     // Если есть слой с подходящим типом объектов.
                     if (spotLayerO.IsSome)
                     {
@@ -65,61 +67,7 @@ namespace Game.Extensions
             {
                 for (var i = 0; i < _pools.Count; i++)
                 {
-                    var layerO = _pools[i].GetLayer<T>();
-                    // В пуле нет подходящего слоя.
-                    if(layerO.IsNone)
-                        continue;
-
-                    // Слой найден и может быть кеширован.
-                    var layer = layerO.Value;
-                    CacheLayer(type, layer);
-
-                    return layer.GetInstance() as T;
-                }
-            }
-            
-            Debug.Log($"Не найдено ни одного пула для типа {type.Name} " +
-                      $"пользователя {gameObject.name}");
-            // Не найдено ни одного пула.
-            return Option<T>.None;
-        }
-
-        public override Option<T> GetInstance<T>(Func<T, bool> predicate)
-        {
-            var type = typeof(T);
-            
-            // Имеет собственные префабы.
-            if (HasSpot)
-            {
-                var layer = IsCachedLayer<T>();
-                // Если не найдено слоя для типа в кеше.
-                if (layer.IsNone)
-                {
-                    var spotLayerO = GetLayer<T>(predicate);
-                    // Если есть слой с подходящим типом объектов.
-                    if (spotLayerO.IsSome)
-                    {
-                        var spotLayer = spotLayerO.Value;
-                        CacheLayer(type, spotLayer);
-
-                        var inst = spotLayer.GetInstance() as T;
-                        return inst;
-                    }
-                    // Будем искать во внешних пулах.
-                }
-                // Найден слой в кеше.
-                else
-                {
-                    var inst = layer.Value.GetInstance() as T;
-                    return inst;
-                }
-            }
-            // Если нет собственных префабов или не найдено префаба с нужным типом.
-            else
-            {
-                for (var i = 0; i < _pools.Count; i++)
-                {
-                    var layerO = _pools[i].GetLayer<T>(predicate);
+                    var layerO = _pools[i].GetLayer(predicate);
                     // В пуле нет подходящего слоя.
                     if(layerO.IsNone)
                         continue;
@@ -155,32 +103,48 @@ namespace Game.Extensions
             return Option<PrefabLayer>.None;
         }
 
+        /// <summary>
+        /// Кеширование запроса к слою префабов.
+        /// </summary>
         private void CacheLayer(Type type, PrefabLayer layer)
         {
             _typeToLayer.Add(type, layer);
         }
         
+        /// <summary>
+        /// Находит внешние пулы по заданным названиям.
+        /// </summary>
         private void SetupPools()
         {
             _pools.Capacity = poolNames.Count;
-            
-            for (var i = 0; i < poolNames.Count; i++)
-            {
-                var pool = PoolManager.Instance.GetPool(poolNames[i]);
 
-                if (pool.IsNone)
+            // Если пул менеджер существует и инициализирован.
+            if (PoolManager.Exist)
+            {
+                for (var i = 0; i < poolNames.Count; i++)
                 {
-                    Debug.Log($"Не найдено пула с названием {poolNames[i]}");
-                    return;
-                }
-                else
-                {
-                    // Если подобного пула нет в списке
-                    if (!_pools.Contains(pool.Value))
+                    var pool = PoolManager.Instance.GetPool(poolNames[i]);
+
+                    if (pool.IsNone)
                     {
-                        _pools.Add(pool.Value);
+                        Debug.Log($"Не найдено пула с названием {poolNames[i]}");
+                        return;
+                    }
+                    else
+                    {
+                        // Если подобного пула нет в списке
+                        if (!_pools.Contains(pool.Value))
+                        {
+                            _pools.Add(pool.Value);
+                        }
                     }
                 }
+            }
+            else
+            {
+                Debug.Log("Менеджер пулов не инициаизирован. Провайдер ожидает инициализации.");
+                // Ождиаем появление пула.
+                PoolManager.OnInstanceCreated.Subscribe(x => SetupPools(), this);
             }
         }
     }

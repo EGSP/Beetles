@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 4067323782619277162}
   - component: {fileID: 4067323782619277163}
   m_Layer: 0
-  m_Name: Resource (Common)
+  m_Name: Resource (Rare)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6559ae0e20d64679a53a1cbfc7cc8ba8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rarity: 0
+  _rarity: 1
   terminationTime: 0
 --- !u!1 &4067323783407348105
 GameObject:
@@ -137,7 +137,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1be0d8feb39dd084b85fc87b2cb59073, type: 2}
+  - {fileID: 2100000, guid: a1d8aefe2c7347e449da82f0fce26b38, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

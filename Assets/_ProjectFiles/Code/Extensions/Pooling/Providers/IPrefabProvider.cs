@@ -11,8 +11,6 @@ namespace Game.Extensions
         /// <summary>
         /// Возвращает экземпляр заданного типа.
         /// </summary>
-        Option<T> GetInstance<T>() where T : LifetimeMonoBehaviour;
-
-        Option<T> GetInstance<T>(Func<T,bool> predicate) where T : LifetimeMonoBehaviour;
+        Option<T> GetInstance<T>(Func<T, bool> predicate = null) where T : LifetimeMonoBehaviour;
     }
 }

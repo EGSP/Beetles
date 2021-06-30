@@ -7,9 +7,6 @@ namespace Game.Extensions
 {
     public class PoolProvider : MonoBehaviour, IPrefabProvider
     {
-        [Header("Global")] 
-        [SerializeField] private bool useGlobal;
-        
         [Header("Spot")]
         [SerializeField] private List<PrefabSettings> spotPrefabs;
 
@@ -47,61 +44,62 @@ namespace Game.Extensions
             CreateSpotPool();
         }
 
-        public virtual Option<T> GetInstance<T>() where T : LifetimeMonoBehaviour
+        public Option<T> GetInstance<T>(Func<T, bool> predicate = null)
+            where T : LifetimeMonoBehaviour
         {
-            for (var i = 0; i < _spotLayers.Count; i++)
-            {
-                var layer = _spotLayers[i];
-                if (layer.Is<T>())
-                {
-                    return layer.GetInstance() as T;
-                }
-            }
-            
-            return Option<T>.None;
+            if (predicate == null)
+                return GetInstance(Option<Func<T, bool>>.None);
+
+            return GetInstance(predicate.Some());
         }
 
-        public virtual Option<T> GetInstance<T>(Func<T, bool> predicate) where T : LifetimeMonoBehaviour
-        {
-            for (var i = 0; i < _spotLayers.Count; i++)
-            {
-                var layer = _spotLayers[i];
-                if (layer.Is<T>(predicate))
-                {
-                    return layer.GetInstance() as T;
-                }
-            }
-            
-            return Option<T>.None;
-        }
-
-        /// <summary>
-        /// Возвращает слой для указанного типа экземпляра префаба.
-        /// </summary>
-        public Option<PrefabLayer> GetLayer<T>() where T : LifetimeMonoBehaviour
-        {
-            for (var i = 0; i < _spotLayers.Count; i++)
-            {
-                var layer = _spotLayers[i];
-                if (layer.Is<T>())
-                {
-                    return layer;
-                }
-            }
-            return Option<PrefabLayer>.None;
-        }
-
-        public Option<PrefabLayer> GetLayer<T>(Func<T, bool> predicate)
+        protected virtual Option<T> GetInstance<T>(Option<Func<T, bool>> predicate = default)
             where T : LifetimeMonoBehaviour
         {
             for (var i = 0; i < _spotLayers.Count; i++)
             {
                 var layer = _spotLayers[i];
-                if (layer.Is<T>(predicate))
+
+                if (layer.Is(predicate.Value))
                 {
-                    return layer;
+                    return layer.GetInstance() as T;
                 }
             }
+            
+            return Option<T>.None;
+        }
+
+        public Option<PrefabLayer> GetLayer<T>(Option<Func<T, bool>> predicate)
+            where T : LifetimeMonoBehaviour
+        {
+            // Вынес в два разных цикла, чтобы не делать проверку на существование предиката каждую итерацию.
+            if (predicate.IsSome)
+            {
+                for (var i = 0; i < _spotLayers.Count; i++)
+                {
+                    var layer = _spotLayers[i];
+                
+                
+                    if (layer.Is(predicate.Value))
+                    {
+                        return layer;
+                    }
+                }
+            }
+            else
+            {
+                for (var i = 0; i < _spotLayers.Count; i++)
+                {
+                    var layer = _spotLayers[i];
+                
+                
+                    if (layer.Is<T>())
+                    {
+                        return layer;
+                    }
+                }
+            }
+            
             return Option<PrefabLayer>.None;
         }
 
@@ -144,6 +142,9 @@ namespace Game.Extensions
 
         private void CreateSpotPool()
         {
+            if (spotPrefabs.Count == 0)
+                return;
+            
             HasSpot = false;
 
             // Cоздаем игровые объекты 
@@ -155,16 +156,14 @@ namespace Game.Extensions
                 var settings = spotPrefabs[i];
                 CreateSpotLayer(settings.prefab, settings.count);
             }
-            
-            if (_spotLayers.Count == 0)
-                return;
 
             HasSpot = true;
         }
         
         private void CreateSpotPoolSpace()
         {
-            _spotParent = new GameObject($"[Pool Provider] {gameObject.name}");
+            // _spotParent = new GameObject($"[Pool Provider] {gameObject.name}");
+            _spotParent = gameObject;
         }
 
         private void CreateSpotLayer(LifetimeMonoBehaviour prefab, int count)

@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
 using Egsp.Core;
+using UnityEngine;
 
 namespace Game.Extensions
 {
     [LazyInstance(false)]
-    public class PoolManager : SingletonRaw<PoolManager>
+    public class PoolManager : Singleton<PoolManager>
     {
-        private List<PoolProvider> _pools = new List<PoolProvider>();
+        [SerializeField] private List<PoolProvider> pools;
 
-        public Option<PoolProvider> GetPool(string name)
+        public Option<PoolProvider> GetPool(string poolName)
         {
-            var coincidence = _pools.FirstOrNone(x
-                => x.PoolName == name);
+            var coincidence = pools.FirstOrNone(x
+                => x.PoolName == poolName);
 
             return coincidence;
         }
