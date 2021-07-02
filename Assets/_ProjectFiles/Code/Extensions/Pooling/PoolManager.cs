@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Game.Extensions
 {
+    /// <summary>
+    /// Хранит в себе все общие пулы.
+    /// </summary>
     [LazyInstance(false)]
     public class PoolManager : Singleton<PoolManager>
     {
