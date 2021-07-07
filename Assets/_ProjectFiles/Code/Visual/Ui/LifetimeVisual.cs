@@ -1,5 +1,4 @@
-﻿using Egsp.Core;
-using Egsp.Core.Ui;
+﻿using Egsp.Core.Ui;
 using Game.Extensions;
 
 namespace Game.Visual.Ui
