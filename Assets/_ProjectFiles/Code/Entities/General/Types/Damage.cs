@@ -1,8 +1,11 @@
-﻿namespace Game.Entities
+﻿using System;
+
+namespace Game.Entities
 {
     /// <summary>
     /// Значение урона.
     /// </summary>
+    [Serializable]
     public readonly struct Damage
     {
         public readonly uint Value;

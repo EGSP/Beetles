@@ -1,9 +1,11 @@
-﻿namespace Game.Entities
+﻿using Game.Extensions;
+
+namespace Game.Entities
 {
     /// <summary>
     /// Базовый интерфейс для сущностей, которые могут быть подобраны.
     /// </summary>
-    public interface IPickable
+    public interface IPickable : ILifetime
     {
         /// <summary>
         /// Может ли сущность быть подобрана
@@ -13,11 +15,11 @@
         /// <summary>
         /// Сущность была подобрана.
         /// </summary>
-        void Picked();
+        void PickIt();
         
         /// <summary>
         /// Сущность положили.
         /// </summary>
-        void Put();
+        void PutIt();
     }
 }

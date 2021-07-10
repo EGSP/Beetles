@@ -35,13 +35,13 @@ namespace Game.Entities.Resources
             }
         }
 
-        public void Picked()
+        public void PickIt()
         {
             StopTermination();
             Lock();
         }
 
-        public void Put()
+        public void PutIt()
         {
             StartTermination();
             Unlock();

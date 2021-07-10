@@ -14,7 +14,7 @@ namespace Game.Extensions
         /// Родительский лайфтайм, который может быть установлен извне.
         /// Нужен чтобы привязать данный объект к другому. 
         /// </summary>
-        private Option<Lifetime> _parentLifetime = Option<Lifetime>.None; 
+        private Option<LifetimeDefinition> _parentedLifetime = Option<LifetimeDefinition>.None; 
         
         /// <summary>
         /// Ключ к управлению времени жизни объекта. Именно на этот лайфтайм привязываются
@@ -65,7 +65,7 @@ namespace Game.Extensions
                 
                 // Избавляемся от родительского лайфтайма, чтобы в дальнейшем можно было установить 
                 // нового родителя, если наш объект не будет уничтожаться.
-                _parentLifetime = Option<Lifetime>.None;
+                _parentedLifetime = Option<LifetimeDefinition>.None;
 
                 switch (Format)
                 {
@@ -76,6 +76,19 @@ namespace Game.Extensions
                         Destroy(gameObject);
                         break;
                 }
+            }
+        }
+
+        protected void TerminateByParent(LifetimeDefinition definition)
+        {
+            // Если объект привязан к жизни родителя.
+            if (_parentedLifetime.IsSome)
+            {
+                var current = _parentedLifetime.Value;
+                
+                // Если переданный родитель является текущим для объекта.
+                if(definition == current)
+                    Terminate();
             }
         }
 
@@ -120,19 +133,25 @@ namespace Game.Extensions
         /// <exception cref="InvalidOperationException">Нельзя установить родительский лайфтайм, если он был установлен ранее.</exception>
         public void Parent(Lifetime parentLifetime)
         {
-            if (_parentLifetime.IsSome)
-                throw new InvalidOperationException("Нельзя установить родительский лайфтайм, если он был установлен ранее.");
-            
+            // Если уже есть родительский объект,
+            // то нужно его отсоединить.
+            if (_parentedLifetime.IsSome)
+            {
+                var oldParented = _parentedLifetime.Value;
+                // Убираем ссылку, т.к. при терминации есть проверка на текущего родителя.
+                _parentedLifetime = Option<LifetimeDefinition>.None;
+                // Убираем прошлую связь.
+                oldParented.Terminate();
+
+                // throw new InvalidOperationException(
+                //     "Нельзя установить родительский лайфтайм, если он был установлен ранее.");
+            }
+
             // Создаем лайфтайм, связанный с родительским.
             var parentedLifetimeDefinition = parentLifetime.CreateNested();
-            // Нам дефинишн не нужен, потому что у нас есть свой собственный.
-            // Можно было бы заменить свой на новый, однако в момент создания объекта,
-            // Awake или Start на наш лайфтайм может кто-нибудь подписаться.
-            // Можно было бы сделать рекомендацию, но ее же никто не будет соблюдать :).
-            // Поэтому контроллируем два лайфтайма.
-            _parentLifetime = parentedLifetimeDefinition.Lifetime;
-            // Терминируем наш объект, если родительский объект начал терминацию.
-            _parentLifetime.Value.OnTermination(Terminate);
+            parentedLifetimeDefinition.Lifetime.OnTermination(() => TerminateByParent(parentedLifetimeDefinition));
+            
+            _parentedLifetime = parentedLifetimeDefinition;
         }
 
         /// <summary>
