@@ -11,6 +11,7 @@ namespace Game.Io
         private Option<InputSettings> _inputSettings = Option<InputSettings>.None;
 
         private List<KeyObserver> _keyObservers = new List<KeyObserver>();
+        private List<AxisObserver> _axisObservers = new List<AxisObserver>();
         
         public List<IInputUser> InputUsers { private get; set; }
 
@@ -21,6 +22,7 @@ namespace Game.Io
                 _inputSettings = InputSettings.PcSettings();
             
             _keyObservers = CreateKeyObservers(_inputSettings.Value);
+            _axisObservers = CreateAxisObservers(_inputSettings.Value);
         }
 
         private void Update()
@@ -30,7 +32,7 @@ namespace Game.Io
             {
                 _keyObservers[i].Observe(deltaTime);
             }
-            
+
             for (var i = 0; i < InputUsers.Count; i++)
             {
                 InputUsers[i].UseInput(this);
@@ -80,7 +82,22 @@ namespace Game.Io
         {
             return _keyObservers.FirstOrNone(x =>
                 x.Key.GameplayKey == key);
-        } 
+        }
+
+        public float GetAxis(GameplayAxis axis)
+        {
+            var axisO = FindAxis(axis);
+            if (axisO.IsNone)
+                return 0;
+
+            return axisO.Value.Get();
+        }
+
+        private Option<AxisObserver> FindAxis(GameplayAxis axis)
+        {
+            return _axisObservers.FirstOrNone(x =>
+                x.GameplayAxis == axis);
+        }
 
         private Option<InputSettings> LoadInputs()
         {
@@ -105,6 +122,20 @@ namespace Game.Io
             }
 
             return keyObservers;
+        }
+
+        private List<AxisObserver> CreateAxisObservers(InputSettings input)
+        {
+            var axisObservers = new List<AxisObserver>(input.Axes.Count);
+
+            for (var i = 0; i < input.Axes.Count; i++)
+            {
+                var axis = input.Axes[i];
+                var axisObserver = new AxisObserver(axis);
+                axisObservers.Add(axisObserver);
+            }
+
+            return axisObservers;
         }
     }
 }

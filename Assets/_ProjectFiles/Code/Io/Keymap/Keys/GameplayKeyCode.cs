@@ -12,8 +12,8 @@
         Right,
         
         // Mouse
-        MouseLeft,
-        MouseRight,
-        MouseMiddle
+        Select,
+        Option,
+        AdditionalOption
     }
 }

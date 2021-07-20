@@ -20,8 +20,8 @@ namespace Game.Player
             var forward = 0f;
             var right = 0f;
 
-            forward = Input.GetAxisRaw("Vertical");
-            right = Input.GetAxisRaw("Horizontal");
+            forward = input.GetAxis(GameplayAxis.MoveZ);
+            right = input.GetAxis(GameplayAxis.MoveX);
 
             if (_beetle != null)
             {
