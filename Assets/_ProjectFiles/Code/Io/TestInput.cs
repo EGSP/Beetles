@@ -6,7 +6,7 @@ namespace Game.Io
     {
         public void UseInput(GameInputSystem input)
         {
-            if (input.ReadState(GameplayKeyCode.Up, KeyState.Hold))
+            if (input.GetState(GameplayKeyCode.Up, KeyState.Hold))
                 Debug.Log(true);
         }
     }

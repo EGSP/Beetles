@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Egsp.Core;
 using UnityEngine;
 
 namespace Game.Io
 {
+    [RequireComponent(typeof(GameInputUsers))]
     public class GameInputSystem : MonoBehaviour
     {
         private Option<InputSettings> _inputSettings = Option<InputSettings>.None;
@@ -38,7 +40,7 @@ namespace Game.Io
         /// <summary>
         /// Получение состояния ввода.
         /// </summary>
-        public KeyState Read(GameplayKeyCode key)
+        public KeyState Get(GameplayKeyCode key)
         {
             var coincidence = FindKey(key);
 
@@ -48,9 +50,30 @@ namespace Game.Io
             return coincidence.Value.KeyState;
         }
 
-        public bool ReadState(GameplayKeyCode key, KeyState state)
+        public bool GetState(GameplayKeyCode key, KeyState state, bool holdTolerance = true)
         {
-            return Read(key) == state;
+            var keyState = Get(key);
+            switch (keyState)
+            {
+                case KeyState.Inactive:
+                    return keyState == state;
+                case KeyState.Down:
+                    return keyState == state;
+                case KeyState.Hold:
+                    if (holdTolerance)
+                    {
+                        if (state == KeyState.Down)
+                            return true;
+                        
+                        return keyState == state;
+                    }
+                    else
+                    {
+                        return keyState == state;
+                    }
+            }
+
+            return false;
         }
 
         private Option<KeyObserver> FindKey(GameplayKeyCode key)

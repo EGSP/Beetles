@@ -20,7 +20,7 @@ namespace Game.Extensions
         {
             _lifetimeDefinition = targetLifetime.CreateNested();
             Lifetime = _lifetimeDefinition.Lifetime;
-            Lifetime.OnTermination(this);
+            Lifetime.TryOnTermination(this);
             
             Value = value;
         }

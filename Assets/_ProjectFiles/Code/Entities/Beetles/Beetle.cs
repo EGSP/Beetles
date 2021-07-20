@@ -1,4 +1,5 @@
-﻿using Game.Extensions;
+﻿using System;
+using Game.Extensions;
 using JetBrains.Lifetimes;
 using UnityEngine;
 
@@ -7,26 +8,48 @@ namespace Game.Entities.Beetles
     /// <summary>
     /// Базовый класс для всех жуков.
     /// </summary>
-    public class Beetle : LifetimeMonoBehaviour, IPickable
+    public partial class Beetle : LifetimeMonoBehaviour, IPickable
     {
         [Header("Health")]
         [SerializeField] private Health health;
         [Tooltip("Время, которое существует жук после потери всего здоровья")]
         [Range(0,360)]
         [SerializeField] private float knockoutTime;
-        [Header("Body")]
+
+        [Header("Body")] 
+        [SerializeField] private BeetleBody body;
         [SerializeField] private float moveSpeed;
         [SerializeField] private Transform pickablePlace;
+        [SerializeField] private Rigidbody rigidBody;
+        
         [Header("Attack")]
         [SerializeField] private Damage damage;
-
-        public bool CanBePicked { get; private set; } = false;
-
+        
         /// <summary>
         /// Подобранный жуком объект.
         /// </summary>
-        private Linked<IPickable> _pickedObject = new Linked<IPickable>(Lifetime.Terminated, null);
-        
+        private Linked<IPickable> _pickedObject;
+
+        public bool CanBePicked { get; private set; } = false;
+
+        public BeetleBody Body => body;
+
+        private void Awake()
+        {
+            _pickedObject = new Linked<IPickable>(Lifetime.Terminated, null);
+            SetupPhysicsBody();
+        }
+
+        private void FixedUpdate()
+        {
+            UpdateVelocity();
+        }
+
+        private void LateUpdate()
+        {
+            CheckPhysics();
+        }
+
         public void PickIt()
         {
         }
